@@ -46,10 +46,13 @@ class On_Message(commands.Cog):
             message.content = " ".join(mList)
 
             if message.content.upper().startswith("V!UPDATE"):
-                await message.channel.send("Syncing DB")
-                for member in message.guild.members:
-                    insert_db_user(member)
-                await message.channel.send("Completed DB Sync")
+                if "Manager" in [role.name for role in message.author.roles]:
+                    await message.channel.send("Syncing DB")
+                    for member in message.guild.members:
+                        insert_db_user(member)
+                    await message.channel.send("Completed DB Sync")
+                else:
+                    discord_error("This command requires permission rank `MANAGER`", message.channel)
 
             rate = random.randint(2,2)
             if rate == 1:

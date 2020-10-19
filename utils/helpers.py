@@ -8,11 +8,11 @@ import discord
 
 def insert_db_user(member):
     try:
-        sql.execute_query("ibm.db", "INSERT INTO Members (UserID) VALUES ('%s')" % (member.id))
+        sql.execute_query("INSERT INTO Members (UserID) VALUES ('%s')" % (member.id))
     except:
         log.warn("User already exists in Database")
         try:
-            cinfo(member.name)
+            log.debug(member.name)
         except:
             pass
 
@@ -22,7 +22,7 @@ def give_item(item, member):
         items_new = item+"_"
     else:
         items_new = items_current + item +"_"
-    sql.execute_query("ibm.db", "UPDATE Members SET items = '%s' WHERE UserID = %s" % (items_new, str(member.id)))
+    sql.execute_query("UPDATE Members SET items = '%s' WHERE UserID = %s" % (items_new, str(member.id)))
 
 def balance_formatter(balance):
     cBalance = "{:,}".format(balance)
@@ -44,21 +44,21 @@ def balance_formatter(balance):
 
 def set_balance(user, balance):
     user_id = user.id
-    sql.execute_query("ibm.db", "UPDATE Members SET Balance = %s WHERE UserID = %s" % (str(balance), str(user_id)))
+    sql.execute_query("UPDATE Members SET Balance = %s WHERE UserID = %s" % (str(balance), str(user_id)))
 
 def set_balance_id(user_id, balance):
-    sql.execute_query("ibm.db", "UPDATE Members SET Balance = %s WHERE UserID = %s" % (str(balance), str(user_id)))
+    sql.execute_query("UPDATE Members SET Balance = %s WHERE UserID = %s" % (str(balance), str(user_id)))
 
 def fetch_items(userID):
-    return sql.db_query("ibm.db", "SELECT items FROM Members WHERE UserID = %s" % (str(userID)))
+    return sql.db_query("SELECT items FROM Members WHERE UserID = %s" % (str(userID)))
 
 def fetch_balance(user):
     user_id = user.id
-    balance = sql.db_query("ibm.db", "SELECT Balance FROM Members WHERE UserID = %s" % (str(user_id)))[0][0]
+    balance = sql.db_query("SELECT Balance FROM Members WHERE UserID = %s" % (str(user_id)))[0][0]
     return balance
 
 def fetch_balance_id(user_id):
-    balance = sql.db_query("ibm.db", "SELECT Balance FROM Members WHERE UserID = %s" % (str(user_id)))[0][0]
+    balance = sql.db_query("SELECT Balance FROM Members WHERE UserID = %s" % (str(user_id)))[0][0]
     return balance
 
 def add_balance(user, amount):
@@ -72,16 +72,16 @@ def add_balance_id(user_id, amount):
     set_balance_id(user_id, new_balance)
 
 def get_profile(userID):
-    profile = sql.db_query("ibm.db", "SELECT Balance, Level, expTotal, Badges, profileColour, profileHashtag, exp FROM Members WHERE UserID = %s" % (userID))[0]
+    profile = sql.db_query("SELECT Balance, Level, expTotal, Badges, profileColour, profileHashtag, exp FROM Members WHERE UserID = %s" % (userID))[0]
     return profile
 
 def level_up(userID, level):
-    sql.execute_query("ibm.db", "UPDATE Members SET Level = %s WHERE UserID = %s" % (str(level), str(userID)))
+    sql.execute_query("UPDATE Members SET Level = %s WHERE UserID = %s" % (str(level), str(userID)))
 
 async def check_level_up(userID, guild, channel):
     Checking = True
     while Checking:
-        level_data = sql.db_query("ibm.db", "SELECT Exp, Level FROM Members WHERE UserID = %s" % (str(userID)))[0]
+        level_data = sql.db_query("SELECT Exp, Level FROM Members WHERE UserID = %s" % (str(userID)))[0]
         Exp = level_data[0]
         lvl = level_data[1]
         Required = 5 * (lvl * lvl) + (50 * lvl) + 100
@@ -118,18 +118,18 @@ async def check_level_up(userID, guild, channel):
                         old_role = discord.utils.get(guild.roles, id=630451524602036254)
                     await user.add_roles(new_role)
                     await user.remove_roles(old_role)
-                    await channel.send(embed=discord.Embed(title="Level Up!", description="Congratulations %s! You've reached Level %s! That means you've unlocked the `%s` role!" % (user.mention, str(level), new_role.name), color=colour.primary))
+                    await channel.send(embed=discord.Embed(title="Level Up!", description="Congratulations %s! You've reached Level %s! That means you've unlocked the `%s` role!" % (user.mention, str(lvl), new_role.name), color=colour.primary))
         else:
             Checking = False
 
 def fetch_exps(userID):
-    return sql.db_query("ibm.db", "SELECT Exp, ExpTotal FROM Members WHERE UserID = %s" % (str(userID)))[0]
+    return sql.db_query("SELECT Exp, ExpTotal FROM Members WHERE UserID = %s" % (str(userID)))[0]
 
 def set_exp(userID, amount):
-    sql.execute_query("ibm.db", "UPDATE Members SET Exp = %s WHERE UserID = %s" % (str(amount),str(userID)))
+    sql.execute_query("UPDATE Members SET Exp = %s WHERE UserID = %s" % (str(amount),str(userID)))
 
 def set_exp_max(userID, amount):
-    sql.execute_query("ibm.db", "UPDATE Members SET ExpTotal = %s WHERE UserID = %s" % (str(amount),str(userID)))
+    sql.execute_query("UPDATE Members SET ExpTotal = %s WHERE UserID = %s" % (str(amount),str(userID)))
 
 def sub_exp_only(userID, amount):
     current_exps = fetch_exps(userID)
@@ -181,3 +181,14 @@ def time_phaser(seconds):
     if s > 0:
         output = output + str(int(round(s, 0))) + " Seconds "
     return output
+
+
+async def discord_error(errorMessage: str, ctx):
+
+    '''
+        Generates an error embed and sends it to the provided context's channel
+    '''
+
+    em = discord.Embed(description=errorMessage, color=colour.reds)
+    em.set_author(name="Error")
+    await ctx.send(embed=em)

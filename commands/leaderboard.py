@@ -15,11 +15,10 @@ class Leaderboard(commands.Cog):
 
     @commands.command(aliases=["lb", "lboard", "topusers", "top"])
     async def leaderboard(self, ctx):
-        log.debug("%s issued server command %s" % (str(ctx.message.author), str(ctx.message.content)))
         await leaderboard_main(ctx, self=self)
 
 def generate_leaderboard_string(guild, page=1):
-    leaderboard_2d_array = sql.db_query("ibm.db", "SELECT UserID, Level, expTotal FROM Members WHERE NOT UserID = 1 ORDER BY expTotal DESC")
+    leaderboard_2d_array = sql.db_query("SELECT UserID, Level, expTotal FROM Members WHERE NOT UserID = 1 ORDER BY expTotal DESC")
     leaderboard_2d_array_processed = []
     server_total = 0
     for entry in leaderboard_2d_array:

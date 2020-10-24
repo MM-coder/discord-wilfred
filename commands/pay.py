@@ -13,7 +13,7 @@ class Pay(commands.Cog):
 
     @commands.command(aliases=["transfer"])
     async def pay(self, ctx, targetMember : discord.Member = None, amount = None):
-        if targetMember == None or amount == None:
+        if targetMember == None or amount == None or tagerMember == ctx.author:
             await ctx.send("Incorrect Usage, !pay <user> <amount>")
         else:
             amount = round(float(amount), 2) # Don't want people sending 0.33333... to people
